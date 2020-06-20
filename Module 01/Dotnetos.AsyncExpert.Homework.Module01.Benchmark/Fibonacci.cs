@@ -4,7 +4,8 @@ using BenchmarkDotNet.Diagnostics.Windows.Configs;
 
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
-    [DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
+    [DisassemblyDiagnoser(exportCombinedDisassemblyReport: true, exportGithubMarkdown: true)]
+    [MemoryDiagnoser]
     [NativeMemoryProfiler]
     public class FibonacciCalc
     {
@@ -20,7 +21,8 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
         [ArgumentsSource(nameof(Data))]
         public ulong Recursive(ulong n)
         {
-            if (n == 1 || n == 2) return 1;
+            if (n == 1 || n == 2)
+                return 1;
             return Recursive(n - 2) + Recursive(n - 1);
         }
 
@@ -28,20 +30,40 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
         [ArgumentsSource(nameof(Data))]
         public ulong RecursiveWithMemoization(ulong n)
         {
-            return 0;
+            var fibs = new ulong[n + 1];
+            return Fib(n, fibs);
         }
-        
+        private static ulong Fib(ulong n, ulong[] fibs)
+        {
+            if (n == 0 || n == 1)
+                return n;
+
+            fibs[n] = Fib(n - 1, fibs) + Fib(n - 2, fibs);
+            return fibs[n];
+        }
+
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public ulong Iterative(ulong n)
         {
-            return 0;
+            ulong a = 0;
+            ulong b = 1;
+            // In N steps compute Fibonacci sequence iteratively.
+            for (ulong i = 0; i < n; i++)
+            {
+                ulong temp = a;
+                a = b;
+                b = temp + b;
+            }
+            return a;
         }
 
         public IEnumerable<ulong> Data()
         {
             yield return 1;
             yield return 2;
+            yield return 3;
+            yield return 4;
         }
     }
 }
