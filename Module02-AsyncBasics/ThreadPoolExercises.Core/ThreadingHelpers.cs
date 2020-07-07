@@ -11,7 +11,7 @@ namespace ThreadPoolExercises.Core
         // * If an `action` throws and exception (or token has been cancelled) - `errorAction` should be invoked (if provided)
 
 
-        public static void ExecuteOnThread(Action action, int repeats, 
+        public static void ExecuteOnThread(Action action, int repeats,
             CancellationToken token = default, Action<Exception>? errorAction = null)
         {
             var isCanceledOrException = false;
@@ -57,6 +57,7 @@ namespace ThreadPoolExercises.Core
             int repeats, CancellationToken token = default, Action<Exception>? errorAction = null)
         {
             var hasExeption = false;
+            using var waitHandle = new AutoResetEvent(false);
 
             for (int i = 0; i < repeats; i++)
             {
@@ -68,7 +69,7 @@ namespace ThreadPoolExercises.Core
                     errorAction?.Invoke(new OperationCanceledException(token));
                     return;
                 }
-                using var waitHandle = new AutoResetEvent(false);
+
                 ThreadPool.QueueUserWorkItem(new WaitCallback((x) =>
                 {
                     try
